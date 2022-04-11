@@ -11,14 +11,14 @@ const random = (arr: Array<string>) =>
   arr[Math.floor(Math.random() * arr.length)];
 
 export const loader: LoaderFunction = async () => {
-  return json({ name: `${random(adjectives)}-${random(animals)}` });
+  return json({ roomName: `${random(adjectives)}-${random(animals)}` });
 };
 
 export const action: ActionFunction = async ({ request }) => {
   const body = await request.formData();
   const { roomName, ...statements } = Object.fromEntries(body);
   await redis.set(
-    `${roomName}.questions`,
+    `${roomName}.statements`,
     JSON.stringify(Object.values(statements))
   );
 
@@ -27,13 +27,10 @@ export const action: ActionFunction = async ({ request }) => {
 
 export default function Create() {
   const data = useLoaderData();
-
   const [statements, setStatements] = useState([""]);
-
   const addStatement = () => {
     setStatements(statements.concat([""]));
   };
-
   const removeStatement = () => {
     setStatements(statements.slice(0, -1));
   };
@@ -46,7 +43,7 @@ export default function Create() {
           <div className="m-2">
             <fieldset>
               <div className="hidden">
-                <input name="roomName" value={data.name} readOnly />
+                <input name="roomName" value={data.roomName} readOnly />
               </div>
               {statements.map((s: string, i: number) => (
                 <label key={i}>
