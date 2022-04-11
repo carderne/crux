@@ -2,6 +2,7 @@ import type { LoaderFunction, ActionFunction } from "@remix-run/node";
 import { useState } from "react";
 import { json, redirect } from "@remix-run/node";
 import { useLoaderData, Form } from "@remix-run/react";
+import { redis } from "~/utils/redis.server";
 
 const adjectives = ["old", "sad", "happy", "tall"];
 const animals = ["rhino", "elephant", "cat", "dolphin"];
@@ -15,9 +16,13 @@ export const loader: LoaderFunction = async () => {
 
 export const action: ActionFunction = async ({ request }) => {
   const body = await request.formData();
-  const { roomName, ...statementsObj } = Object.fromEntries(body);
-  const statements = Object.values(statementsObj);
-  return redirect(`/room/holy-cow`);
+  const { roomName, ...statements } = Object.fromEntries(body);
+  await redis.set(
+    `${roomName}.questions`,
+    JSON.stringify(Object.values(statements))
+  );
+
+  return redirect(`/room/${roomName}`);
 };
 
 export default function Create() {
@@ -41,7 +46,7 @@ export default function Create() {
           <div className="m-2">
             <fieldset>
               <div className="hidden">
-                <input name="name" value={data.name} readOnly />
+                <input name="roomName" value={data.name} readOnly />
               </div>
               {statements.map((s: string, i: number) => (
                 <label key={i}>
