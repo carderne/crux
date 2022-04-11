@@ -21,7 +21,6 @@ export const action: ActionFunction = async ({ request }) => {
     `${roomName}.statements`,
     JSON.stringify(Object.values(statements))
   );
-
   return redirect(`/room/${roomName}`);
 };
 
@@ -38,7 +37,7 @@ export default function Create() {
   return (
     <div>
       <div className="rounded bg-blue-100 p-10">
-        <div>Questions</div>
+        <div>Statements</div>
         <Form reloadDocument method="post">
           <div className="m-2">
             <fieldset>
@@ -76,7 +75,7 @@ export default function Create() {
             </button>
           </div>
           <button type="submit" className="rounded bg-blue-400 p-4">
-            Create room {data.name}
+            Create room {data.roomName}
           </button>
         </Form>
       </div>

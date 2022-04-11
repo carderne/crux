@@ -1,28 +1,32 @@
 import type { LoaderFunction, ActionFunction } from "@remix-run/node";
-import { json } from "@remix-run/node";
+import { json, redirect } from "@remix-run/node";
 import { useLoaderData, Form } from "@remix-run/react";
 import { redis } from "~/utils/redis.server";
 import { useLocation } from "react-router-dom";
 
 export const loader: LoaderFunction = async ({ params }) => {
   const roomName = params.roomName;
-  const questions = await redis
+  const statements = await redis
     .get(`${roomName}.statements`)
     .then((res) => JSON.parse(res));
-  return json({
-    roomName,
-    questions,
-  });
+  if (statements?.length > 0) {
+    return json({
+      roomName,
+      statements,
+    });
+  } else {
+    return redirect("/");
+  }
 };
 
 export const action: ActionFunction = async ({ request }) => {
   const body = await request.formData();
   const { roomName, ...ratings } = Object.fromEntries(body);
-  await redis.rpush(
+  const person = await redis.rpush(
     `${roomName}.ratings`,
-    JSON.stringify(Object.values(ratings))
+    JSON.stringify(Object.values(ratings).map((r) => parseInt(r)))
   );
-  return null;
+  return redirect(`/room/${roomName}/${person}`);
 };
 
 export default function Room() {
@@ -30,7 +34,7 @@ export default function Room() {
   const data = useLoaderData();
   return (
     <div>
-      <h1>Questions for {data.roomName}</h1>
+      <h1>Statements for {data.roomName}</h1>
       <a
         className="text-blue-600"
         href={`http://localhost:3000${location.pathname}`}
@@ -43,7 +47,7 @@ export default function Room() {
             <div className="hidden">
               <input name="roomName" value={data.roomName} readOnly />
             </div>
-            {data.questions.map((q, i) => (
+            {data.statements.map((q, i) => (
               <div className="m-2 bg-red-400 p-2" key={i}>
                 <label>
                   <div>{q}</div>
