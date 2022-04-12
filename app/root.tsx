@@ -1,9 +1,4 @@
-import type {
-  LinksFunction,
-  LoaderFunction,
-  MetaFunction,
-} from "@remix-run/node";
-import { json } from "@remix-run/node";
+import type { LinksFunction, MetaFunction } from "@remix-run/node";
 import {
   Links,
   LiveReload,
@@ -11,6 +6,8 @@ import {
   Outlet,
   Scripts,
   ScrollRestoration,
+  Link,
+  useCatch,
 } from "@remix-run/react";
 
 import tailwindStylesheetUrl from "./styles/tailwind.css";
@@ -25,11 +22,37 @@ export const meta: MetaFunction = () => ({
   viewport: "width=device-width,initial-scale=1",
 });
 
-export const loader: LoaderFunction = async ({ request }) => {
-  return json({
-    user: "foo",
-  });
+const Header = () => {
+  return (
+    <Link to="/">
+      <div className="flex">
+        <h1 className="py-4 px-4 text-xl text-cyan-600">Home</h1>
+      </div>
+    </Link>
+  );
 };
+
+export function CatchBoundary() {
+  const caught = useCatch();
+  return (
+    <html>
+      <head>
+        <title>404</title>
+        <Meta />
+        <Links />
+      </head>
+      <body className="flex flex-col h-screen w-screen">
+        <Header />
+        <div className="m-auto text-3xl text-center w-full italic">
+        <h1>
+          Sorry, that's a {caught.status}
+        </h1>
+        </div>
+        <Scripts />
+      </body>
+    </html>
+  );
+}
 
 export default function App() {
   return (
@@ -38,7 +61,8 @@ export default function App() {
         <Meta />
         <Links />
       </head>
-      <body className="h-full">
+      <body className="flex h-screen w-screen flex-col bg-stone-100 pb-20">
+        <Header />
         <Outlet />
         <ScrollRestoration />
         <Scripts />
