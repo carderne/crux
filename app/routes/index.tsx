@@ -1,14 +1,25 @@
-import { Link, Form } from "@remix-run/react";
+import type { ActionFunction } from "@remix-run/node";
+import { Link, Form, useSubmit } from "@remix-run/react";
+import { redirect } from "@remix-run/node";
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { nanoid } from "nanoid";
+
+export const action: ActionFunction = async ({ request }) => {
+  const body = await request.formData();
+  const { room } = Object.fromEntries(body);
+  const id = nanoid();
+  return redirect(`/${room}`, {
+    headers: { "Set-Cookie": `id=${id}; Max-Age=3600` },
+  });
+};
 
 export default function Index() {
   const [room, setRoom] = useState("");
-  const navigate = useNavigate();
+  const submit = useSubmit();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    navigate(`/${room}`);
+    submit({ room }, { method: "post" });
   };
 
   return (

@@ -3,6 +3,7 @@ import { useState } from "react";
 import { json, redirect } from "@remix-run/node";
 import { useLoaderData, Form } from "@remix-run/react";
 import { redis } from "~/utils/redis.server";
+import { nanoid } from "nanoid";
 
 const adjectives = ["old", "sad", "happy", "tall"];
 const animals = ["rhino", "elephant", "cat", "dolphin"];
@@ -17,11 +18,15 @@ export const loader: LoaderFunction = async () => {
 export const action: ActionFunction = async ({ request }) => {
   const body = await request.formData();
   const { room, ...statements } = Object.fromEntries(body);
+  const id = nanoid();
   await redis.set(
     `${room}.statements`,
     JSON.stringify(Object.values(statements))
   );
-  return redirect(`/${room}`);
+  await redis.set(`${room}.admin`, id);
+  return redirect(`/${room}`, {
+    headers: { "Set-Cookie": `id=${id}; Max-Age=3600` },
+  });
 };
 
 export default function Create() {
@@ -56,11 +61,11 @@ export default function Create() {
                 </label>
               ))}
             </fieldset>
-            <div className="ml-auto my-4 flex flex-row">
+            <div className="my-4 ml-auto flex flex-row">
               <button
                 type="button"
                 onClick={addStatement}
-                className="ml-auto w-14 rounded bg-green-700 text-stone-50 p-2"
+                className="ml-auto w-14 rounded bg-green-700 p-2 text-stone-50"
               >
                 add
               </button>
