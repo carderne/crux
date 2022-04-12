@@ -4,9 +4,8 @@ import { json, redirect } from "@remix-run/node";
 import { useLoaderData, Form } from "@remix-run/react";
 import { redisSet } from "~/utils/redis.server";
 import { nanoid } from "~/utils/utils";
-
-const adjectives = ["old", "sad", "happy", "tall"];
-const animals = ["rhino", "elephant", "cat", "dolphin"];
+import animals from "~/utils/animals";
+import adjectives from "~/utils/adjectives";
 
 const random = (arr: Array<string>) =>
   arr[Math.floor(Math.random() * arr.length)];
