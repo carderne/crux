@@ -1,5 +1,5 @@
 import type { ActionFunction } from "@remix-run/node";
-import { redis } from "~/utils/redis.server";
+import { redis, redisSet } from "~/utils/redis.server";
 
 const colors = ["red", "blue", "green", "purple", "yellow", "pink"];
 
@@ -36,17 +36,17 @@ export const action: ActionFunction = async ({ request }) => {
   const { room } = Object.fromEntries(body);
 
   const statements = await redis
-    .get(`${room}.statements`)
+    .get(`${room}:statements`)
     .then((res) => JSON.parse(res));
 
   const ratings = await redis
-    .hgetall(`${room}.ratings`)
+    .hgetall(`${room}:ratings`)
     .then((res) => parseRatings(res));
 
   if (statements?.length === 0 || ratings?.length === 0) return null;
 
-  const pairings = calculatePairs(statements, ratings);
-  await redis.set(`${room}.pairings`, JSON.stringify(pairings));
+  const pairings = JSON.stringify(calculatePairs(statements, ratings));
+  await redisSet(`${room}:pairings`, pairings);
 
   return null;
 };

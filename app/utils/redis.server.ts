@@ -19,4 +19,14 @@ if (process.env.NODE_ENV === "production") {
   redis = global.__redis;
 }
 
-export { redis };
+const expiry = 7200;
+
+const redisSet = async (key, value) => {
+  await redis.multi().set(key, value).expire(key, expiry).exec();
+};
+
+const redisHSet = async (key, field, value) => {
+  await redis.multi().hset(key, field, value).expire(key, expiry).exec();
+};
+
+export { redis, redisSet, redisHSet };

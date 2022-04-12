@@ -2,7 +2,7 @@ import type { LoaderFunction, ActionFunction } from "@remix-run/node";
 import { useState } from "react";
 import { json, redirect } from "@remix-run/node";
 import { useLoaderData, Form } from "@remix-run/react";
-import { redis } from "~/utils/redis.server";
+import { redisSet } from "~/utils/redis.server";
 import { nanoid } from "~/utils/utils";
 
 const adjectives = ["old", "sad", "happy", "tall"];
@@ -17,13 +17,13 @@ export const loader: LoaderFunction = async () => {
 
 export const action: ActionFunction = async ({ request }) => {
   const body = await request.formData();
-  const { room, ...statements } = Object.fromEntries(body);
+  const { room, ...statementsObj } = Object.fromEntries(body);
+
+  const statements = JSON.stringify(Object.values(statementsObj));
   const id = nanoid();
-  await redis.set(
-    `${room}.statements`,
-    JSON.stringify(Object.values(statements))
-  );
-  await redis.set(`${room}.admin`, id);
+  await redisSet(`${room}:statements`, statements);
+  await redisSet(`${room}:admin`, id);
+
   return redirect(`/${room}`, {
     headers: { "Set-Cookie": `id=${id}; Secure Max-Age=3600` },
   });

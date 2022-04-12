@@ -7,7 +7,7 @@ import { parseCookie } from "~/utils/utils";
 export const getResult = async (room: string, id: string) => {
   try {
     const result = await redis
-      .get(`${room}.pairings`)
+      .get(`${room}:pairings`)
       .then((res) => JSON.parse(res));
     return result[id];
   } catch (error) {
@@ -17,7 +17,7 @@ export const getResult = async (room: string, id: string) => {
 
 const checkAdmin = async (room, id) => {
   try {
-    const adminId = await redis.get(`${room}.admin`);
+    const adminId = await redis.get(`${room}:admin`);
     return id === adminId;
   } catch (err) {
     return false;

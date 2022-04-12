@@ -1,7 +1,7 @@
 import type { LoaderFunction, ActionFunction } from "@remix-run/node";
 import { json, redirect } from "@remix-run/node";
 import { useLoaderData, Form } from "@remix-run/react";
-import { redis } from "~/utils/redis.server";
+import { redis, redisHSet } from "~/utils/redis.server";
 import { parseCookie } from "~/utils/utils";
 import { nanoid } from "~/utils/utils";
 
@@ -17,7 +17,7 @@ const getId = (request) => {
 export const loader: LoaderFunction = async ({ params, request }) => {
   const room = params.room;
   const statements = await redis
-    .get(`${room}.statements`)
+    .get(`${room}:statements`)
     .then((res) => JSON.parse(res));
   const id = getId(request);
 
@@ -40,12 +40,13 @@ export const action: ActionFunction = async ({ request }) => {
   const body = await request.formData();
   const cookie = request.headers.get("cookie");
   const id = parseCookie(cookie)["id"];
-  const { room, ...ratings } = Object.fromEntries(body);
-  await redis.hset(
-    `${room}.ratings`,
-    id,
-    JSON.stringify(Object.values(ratings).map((r) => parseInt(r)))
+  const { room, ...ratingsObj } = Object.fromEntries(body);
+
+  const ratings = JSON.stringify(
+    Object.values(ratingsObj).map((r) => parseInt(r))
   );
+  await redisHSet(`${room}:ratings`, id, ratings);
+
   return redirect(`/${room}/pair`);
 };
 
