@@ -2,17 +2,16 @@ import type { LoaderFunction, ActionFunction } from "@remix-run/node";
 import { json, redirect } from "@remix-run/node";
 import { useLoaderData, Form } from "@remix-run/react";
 import { redis } from "~/utils/redis.server";
-import { useLocation } from "react-router-dom";
 import { parseCookie } from "~/utils/utils";
 import { nanoid } from "~/utils/utils";
 
 const getId = (request) => {
- try {
-  const cookie = request.headers.get("cookie");
-  return parseCookie(cookie)["id"];
- } catch (err) {
-  return nanoid();
- }
+  try {
+    const cookie = request.headers.get("cookie");
+    return parseCookie(cookie)["id"];
+  } catch (err) {
+    return nanoid();
+  }
 };
 
 export const loader: LoaderFunction = async ({ params, request }) => {
@@ -29,7 +28,7 @@ export const loader: LoaderFunction = async ({ params, request }) => {
         statements,
       },
       {
-        headers: { "Set-Cookie": `id=${id}; Max-Age=3600` },
+        headers: { "Set-Cookie": `id=${id}; Secure Max-Age=3600` },
       }
     );
   } else {
@@ -51,13 +50,20 @@ export const action: ActionFunction = async ({ request }) => {
 };
 
 export default function Room() {
-  const location = useLocation();
   const data = useLoaderData();
+
+  const copyURL = () =>
+    navigator.clipboard.writeText(`https://crux.rdrn.me/${data.room}`);
+
   return (
     <div className="flex flex-grow flex-col p-10">
-      <div className="w-full rounded-xl bg-white p-4">
-        {`http://localhost:3000${location.pathname}`}
-      </div>
+      <button
+        type="button"
+        className="mx-auto w-max rounded-xl rounded-xl bg-white p-4 shadow"
+        onClick={copyURL}
+      >
+        <div className="text-xl">copy URL 📋</div>
+      </button>
       <Form reloadDocument method="post" className="h-full">
         <div className="flex h-full flex-col justify-between">
           <fieldset>

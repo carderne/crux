@@ -25,7 +25,7 @@ export const action: ActionFunction = async ({ request }) => {
   );
   await redis.set(`${room}.admin`, id);
   return redirect(`/${room}`, {
-    headers: { "Set-Cookie": `id=${id}; Max-Age=3600` },
+    headers: { "Set-Cookie": `id=${id}; Secure Max-Age=3600` },
   });
 };
 

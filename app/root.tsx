@@ -41,12 +41,10 @@ export function CatchBoundary() {
         <Meta />
         <Links />
       </head>
-      <body className="flex flex-col h-screen w-screen">
+      <body className="flex h-screen w-screen flex-col">
         <Header />
-        <div className="m-auto text-3xl text-center w-full italic">
-        <h1>
-          Sorry, that's a {caught.status}
-        </h1>
+        <div className="m-auto w-full text-center text-3xl italic">
+          <h1>Sorry, that's a {caught.status}</h1>
         </div>
         <Scripts />
       </body>
