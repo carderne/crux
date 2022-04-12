@@ -3,7 +3,7 @@ import { useState } from "react";
 import { json, redirect } from "@remix-run/node";
 import { useLoaderData, Form } from "@remix-run/react";
 import { redis } from "~/utils/redis.server";
-import { nanoid } from "nanoid";
+import { nanoid } from "~/utils/utils";
 
 const adjectives = ["old", "sad", "happy", "tall"];
 const animals = ["rhino", "elephant", "cat", "dolphin"];

@@ -2,15 +2,11 @@ import type { ActionFunction } from "@remix-run/node";
 import { Link, Form, useSubmit } from "@remix-run/react";
 import { redirect } from "@remix-run/node";
 import { useState } from "react";
-import { nanoid } from "nanoid";
 
 export const action: ActionFunction = async ({ request }) => {
   const body = await request.formData();
   const { room } = Object.fromEntries(body);
-  const id = nanoid();
-  return redirect(`/${room}`, {
-    headers: { "Set-Cookie": `id=${id}; Max-Age=3600` },
-  });
+  return redirect(`/${room}`);
 };
 
 export default function Index() {

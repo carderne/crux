@@ -1,3 +1,5 @@
+import { customAlphabet } from "nanoid";
+
 export const parseCookie = (str) =>
   str
     .split(";")
@@ -6,3 +8,5 @@ export const parseCookie = (str) =>
       acc[decodeURIComponent(v[0].trim())] = decodeURIComponent(v[1].trim());
       return acc;
     }, {});
+
+export const nanoid = customAlphabet("abcdefghijklmnopqrstuvwxyz");

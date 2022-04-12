@@ -21,15 +21,15 @@ export const calculatePairs = (statements, ratings) => {
       pairings[maxId] = { statement: s, color: color };
     }
   });
-  console.log("PAIRINGS", pairings);
   return pairings;
 };
 
-const parseRatings = (obj) =>
-  Object.entries(obj).reduce(
+const parseRatings = (ratings) => {
+  return Object.entries(ratings).reduce(
     (acc, [key, val]) => ((acc[key] = JSON.parse(val)), acc),
     {}
   );
+};
 
 export const action: ActionFunction = async ({ request }) => {
   const body = await request.formData();

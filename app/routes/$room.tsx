@@ -3,18 +3,35 @@ import { json, redirect } from "@remix-run/node";
 import { useLoaderData, Form } from "@remix-run/react";
 import { redis } from "~/utils/redis.server";
 import { useLocation } from "react-router-dom";
-import { parseCookie } from "~/utils/utils.ts";
+import { parseCookie } from "~/utils/utils";
+import { nanoid } from "~/utils/utils";
 
-export const loader: LoaderFunction = async ({ params }) => {
+const getId = (request) => {
+ try {
+  const cookie = request.headers.get("cookie");
+  return parseCookie(cookie)["id"];
+ } catch (err) {
+  return nanoid();
+ }
+};
+
+export const loader: LoaderFunction = async ({ params, request }) => {
   const room = params.room;
   const statements = await redis
     .get(`${room}.statements`)
     .then((res) => JSON.parse(res));
+  const id = getId(request);
+
   if (statements?.length > 0) {
-    return json({
-      room,
-      statements,
-    });
+    return json(
+      {
+        room,
+        statements,
+      },
+      {
+        headers: { "Set-Cookie": `id=${id}; Max-Age=3600` },
+      }
+    );
   } else {
     return redirect("/");
   }
@@ -57,10 +74,11 @@ export default function Room() {
                   <select
                     name={i.toString()}
                     className="ml-auto block rounded-xl p-2"
+                    defaultValue={3}
                   >
                     <option value={1}>Hard no</option>
                     <option value={2}>Prob not</option>
-                    <option value={3} selected>Unsure</option>
+                    <option value={3}>Unsure</option>
                     <option value={4}>Guess so</option>
                     <option value={5}>Heck yeah</option>
                   </select>
