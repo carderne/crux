@@ -1,17 +1,24 @@
 import type { ActionFunction } from "@remix-run/node";
-import { Link, Form, useSubmit } from "@remix-run/react";
-import { redirect } from "@remix-run/node";
+import { Link, Form, useSubmit, useActionData } from "@remix-run/react";
+import { json, redirect } from "@remix-run/node";
 import { useState } from "react";
+import { redis } from "~/utils/redis.server";
 
 export const action: ActionFunction = async ({ request }) => {
   const body = await request.formData();
   const { room } = Object.fromEntries(body);
-  return redirect(`/${room}`);
+  const exists = await redis.get(`${room}:exists`);
+  if (exists) {
+    return redirect(`/${room}`);
+  } else {
+    return json({ error: "Room doesn't exist" });
+  }
 };
 
 export default function Index() {
   const [room, setRoom] = useState("");
   const submit = useSubmit();
+  const actionData = useActionData();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -20,7 +27,12 @@ export default function Index() {
 
   return (
     <div className="flex flex-grow flex-col justify-between p-10">
-      <div className="rounded">
+      <div>
+        <div className=" text-sm text-red-500">
+          <div className={actionData?.error ? "visible" : "invisible"}>
+            No such room!
+          </div>
+        </div>
         <Form onSubmit={handleSubmit}>
           <div className="mb-4">
             <label>
