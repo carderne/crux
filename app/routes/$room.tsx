@@ -23,13 +23,8 @@ export const loader: LoaderFunction = async ({ params, request }) => {
 
   if (statements?.length > 0) {
     return json(
-      {
-        room,
-        statements,
-      },
-      {
-        headers: { "Set-Cookie": `id=${id}; Secure Max-Age=3600` },
-      }
+      { room, statements },
+      { headers: { "Set-Cookie": `id=${id}; Secure Max-Age=3600` } }
     );
   } else {
     return redirect("/");
@@ -53,18 +48,29 @@ export const action: ActionFunction = async ({ request }) => {
 export default function Room() {
   const data = useLoaderData();
 
+  const roomShout = data.room.replace("-", " ");
+
   const copyURL = () =>
     navigator.clipboard.writeText(`https://crux.rdrn.me/${data.room}`);
 
   return (
     <div className="flex flex-grow flex-col p-10">
-      <button
-        type="button"
-        className="mx-auto w-max rounded-xl rounded-xl bg-white p-4 shadow"
-        onClick={copyURL}
-      >
-        <div className="text-xl">copy URL 📋</div>
-      </button>
+      <div className="flex">
+        <div className="flex flex-col mr-4">
+          <div className="text-xs">Shout this</div>
+          <div className="bg-white rounded-xl p-4">{roomShout}</div>
+        </div>
+        <div className="flex flex-col ml-auto">
+          <div className="ml-auto text-xs">Or click this</div>
+          <button
+            type="button"
+            className="mx-auto w-max rounded-xl rounded-xl bg-cyan-600 p-4 shadow"
+            onClick={copyURL}
+          >
+            <div className="text-stone-50">copy URL</div>
+          </button>
+        </div>
+      </div>
       <Form reloadDocument method="post" className="h-full">
         <div className="flex h-full flex-col justify-between">
           <fieldset>

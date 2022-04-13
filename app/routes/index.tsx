@@ -15,7 +15,7 @@ export default function Index() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    submit({ room }, { method: "post" });
+    submit({ room: room.replace(" ", "-") }, { method: "post" });
   };
 
   return (
