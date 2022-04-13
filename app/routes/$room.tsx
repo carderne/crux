@@ -2,17 +2,8 @@ import type { LoaderFunction, ActionFunction } from "@remix-run/node";
 import { json, redirect } from "@remix-run/node";
 import { useLoaderData, Form } from "@remix-run/react";
 import { redis, redisHSet } from "~/utils/redis.server";
-import { parseCookie } from "~/utils/utils";
-import { nanoid } from "~/utils/utils";
+import { getId, cookieHeader } from "~/utils/utils";
 
-const getId = (request) => {
-  try {
-    const cookie = request.headers.get("cookie");
-    return parseCookie(cookie)["id"];
-  } catch (err) {
-    return nanoid();
-  }
-};
 
 export const loader: LoaderFunction = async ({ params, request }) => {
   const room = params.room;
@@ -25,7 +16,7 @@ export const loader: LoaderFunction = async ({ params, request }) => {
 
     return json(
       { room, statements },
-      { headers: { "Set-Cookie": `id=${id}; Secure Max-Age=3600` } }
+      { headers: { "Set-Cookie": cookieHeader(id) } }
     );
   } else {
     return redirect("/");
@@ -34,8 +25,7 @@ export const loader: LoaderFunction = async ({ params, request }) => {
 
 export const action: ActionFunction = async ({ request }) => {
   const body = await request.formData();
-  const cookie = request.headers.get("cookie");
-  const id = parseCookie(cookie)["id"];
+  const id = getId(request);
   const { room, ...ratingsObj } = Object.fromEntries(body);
 
   const ratings = JSON.stringify(

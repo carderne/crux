@@ -10,3 +10,14 @@ export const parseCookie = (str) =>
     }, {});
 
 export const nanoid = customAlphabet("abcdefghijklmnopqrstuvwxyz");
+
+export const cookieHeader = (id) => `id=${id}; Secure; Max-Age=3600; Path=/`;
+
+export const getId = (request) => {
+  try {
+    const cookie = request.headers.get("cookie");
+    return parseCookie(cookie)["id"];
+  } catch (err) {
+    return nanoid();
+  }
+};
