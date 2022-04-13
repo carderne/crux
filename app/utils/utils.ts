@@ -9,7 +9,7 @@ export const parseCookie = (str) =>
       return acc;
     }, {});
 
-export const nanoid = customAlphabet("abcdefghijklmnopqrstuvwxyz");
+export const nanoid = customAlphabet("abcdefghijklmnopqrstuvwxyz", 6);
 
 export const cookieHeader = (id) => `id=${id}; Secure; Max-Age=3600; Path=/`;
 
