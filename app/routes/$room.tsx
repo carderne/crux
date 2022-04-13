@@ -11,7 +11,7 @@ export const loader: LoaderFunction = async ({ params, request }) => {
   if (exists) {
     const statements = await redis
       .get(`${room}:statements`)
-      .then((res) => JSON.parse(res));
+      .then((res: any) => JSON.parse(res));
     const id = getId(request);
 
     return json(
@@ -29,7 +29,7 @@ export const action: ActionFunction = async ({ request }) => {
   const { room, ...ratingsObj } = Object.fromEntries(body);
 
   const ratings = JSON.stringify(
-    Object.values(ratingsObj).map((r) => parseInt(r))
+    Object.values(ratingsObj).map((r) => parseInt(r.toString()))
   );
   await redisHSet(`${room}:ratings`, id, ratings);
 
@@ -69,13 +69,13 @@ export default function Room() {
               <div className="hidden">
                 <input name="room" value={data.room} readOnly />
               </div>
-              {data.statements.map((q, i) => (
+              {data.statements.map((statement: string, i: number) => (
                 <div
                   className="my-4 border-b-2 border-stone-600 p-4 last:border-b-0"
                   key={i}
                 >
                   <label>
-                    <div className="italic">"{q}"</div>
+                    <div className="italic">"{statement}"</div>
                     <select
                       name={i.toString()}
                       className="ml-auto block rounded-xl p-2"

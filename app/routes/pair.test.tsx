@@ -24,7 +24,9 @@ test("pair route", async () => {
       },
     };
     await action({ request });
-    const pairings = await redis.get(`${room}:pairings`).then((r) => JSON.parse(r));
+    const pairings = await redis
+      .get(`${room}:pairings`)
+      .then((r: any) => JSON.parse(r));
     expect(pairings.A.statement).toEqual(pairings.B.statement);
   } finally {
     await redis.flushall();

@@ -7,7 +7,7 @@ test("index action", async () => {
     },
   };
   const response = await action({ request })
-    .then((r) => r.text())
-    .then((r) => JSON.parse(r));
+  .then((r: Response) => r.text())
+  .then((r: string) => JSON.parse(r));
   expect(response).toHaveProperty("error");
 });

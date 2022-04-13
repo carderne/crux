@@ -8,8 +8,8 @@ test("getId falls back gracefully", () => {
   expect(getId()).toHaveLength(6);
   const headers = {
     cookie: "id=abcabc;foo=bar",
-    get: function (key) {
-      return this[key];
+    get: function (key: string) {
+      return this.cookie;
     },
   };
   const request = { headers };

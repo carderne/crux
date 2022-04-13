@@ -1,4 +1,5 @@
 import type { ActionFunction } from "@remix-run/node";
+import type { FormEvent } from "react";
 import { Link, Form, useSubmit, useActionData } from "@remix-run/react";
 import { json, redirect } from "@remix-run/node";
 import { useState } from "react";
@@ -20,7 +21,7 @@ export default function Index() {
   const submit = useSubmit();
   const actionData = useActionData();
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     submit({ room: room.replace(" ", "-") }, { method: "post" });
   };

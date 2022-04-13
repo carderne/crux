@@ -21,11 +21,11 @@ if (process.env.NODE_ENV === "production") {
 
 const expiry = 7200;
 
-const redisSet = async (key, value) => {
+const redisSet = async (key: string, value: string) => {
   await redis.multi().set(key, value).expire(key, expiry).exec();
 };
 
-const redisHSet = async (key, field, value) => {
+const redisHSet = async (key: string, field: string, value: string) => {
   await redis.multi().hset(key, field, value).expire(key, expiry).exec();
 };
 

@@ -1,21 +1,22 @@
 import type { LoaderFunction } from "@remix-run/node";
+import type { Pairings } from "./pair";
 import { json } from "@remix-run/node";
 import { useLoaderData, useFetcher } from "@remix-run/react";
 import { redis } from "~/utils/redis.server";
 import { parseCookie } from "~/utils/utils";
 
-export const getResult = async (room: string, id: string) => {
+export const getPairs = async (room: string, id: string) => {
   try {
-    const result = await redis
+    const result: Pairings = await redis
       .get(`${room}:pairings`)
-      .then((res) => JSON.parse(res));
+      .then((res: any) => JSON.parse(res));
     return result[id];
   } catch (error) {
     return null;
   }
 };
 
-const checkAdmin = async (room, id) => {
+const checkAdmin = async (room: string, id: string) => {
   try {
     const adminId = await redis.get(`${room}:admin`);
     return id === adminId;
@@ -25,10 +26,10 @@ const checkAdmin = async (room, id) => {
 };
 
 export const loader: LoaderFunction = async ({ params, request }) => {
-  const room = params.room;
-  const cookie = request.headers.get("cookie");
+  const room = params.room?.toString() || "";
+  const cookie = request.headers.get("cookie")?.toString();
   const id = parseCookie(cookie)["id"];
-  const result = await getResult(room, id);
+  const result = await getPairs(room, id);
   const isAdmin = await checkAdmin(room, id);
   return json({
     room,
@@ -44,7 +45,6 @@ export default function Room() {
   const refresh = () => window.location.reload();
   const pair = () =>
     fetcher.submit({ room: data.room }, { method: "post", action: `/pair` });
-
 
   return (
     <div
