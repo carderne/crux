@@ -16,12 +16,13 @@ const getId = (request) => {
 
 export const loader: LoaderFunction = async ({ params, request }) => {
   const room = params.room;
-  const statements = await redis
-    .get(`${room}:statements`)
-    .then((res) => JSON.parse(res));
-  const id = getId(request);
+  const exists = await redis.get(`${room}:exists`);
+  if (exists) {
+    const statements = await redis
+      .get(`${room}:statements`)
+      .then((res) => JSON.parse(res));
+    const id = getId(request);
 
-  if (statements?.length > 0) {
     return json(
       { room, statements },
       { headers: { "Set-Cookie": `id=${id}; Secure Max-Age=3600` } }
@@ -47,20 +48,20 @@ export const action: ActionFunction = async ({ request }) => {
 
 export default function Room() {
   const data = useLoaderData();
-
+  const hasStatements = data.statements !== null;
   const roomShout = data.room.replace("-", " ");
-
+  const refresh = () => window.location.reload();
   const copyURL = () =>
     navigator.clipboard.writeText(`https://crux.rdrn.me/${data.room}`);
 
   return (
     <div className="flex flex-grow flex-col p-10">
       <div className="flex">
-        <div className="flex flex-col mr-4">
+        <div className="mr-4 flex flex-col">
           <div className="text-xs">Shout this</div>
-          <div className="bg-white rounded-xl p-4">{roomShout}</div>
+          <div className="rounded-xl bg-white p-4">{roomShout}</div>
         </div>
-        <div className="flex flex-col ml-auto">
+        <div className="ml-auto flex flex-col">
           <div className="ml-auto text-xs">Or click this</div>
           <button
             type="button"
@@ -71,42 +72,61 @@ export default function Room() {
           </button>
         </div>
       </div>
-      <Form reloadDocument method="post" className="h-full">
-        <div className="flex h-full flex-col justify-between">
-          <fieldset>
-            <div className="hidden">
-              <input name="room" value={data.room} readOnly />
-            </div>
-            {data.statements.map((q, i) => (
-              <div
-                className="my-4 border-b-2 border-stone-600 p-4 last:border-b-0"
-                key={i}
-              >
-                <label>
-                  <div className="italic">"{q}"</div>
-                  <select
-                    name={i.toString()}
-                    className="ml-auto block rounded-xl p-2"
-                    defaultValue={3}
-                  >
-                    <option value={1}>Hard no</option>
-                    <option value={2}>Prob not</option>
-                    <option value={3}>Unsure</option>
-                    <option value={4}>Guess so</option>
-                    <option value={5}>Heck yeah</option>
-                  </select>
-                </label>
+      {hasStatements && (
+        <Form reloadDocument method="post" className="h-full">
+          <div className="flex h-full flex-col justify-between">
+            <fieldset>
+              <div className="hidden">
+                <input name="room" value={data.room} readOnly />
               </div>
-            ))}
-          </fieldset>
-          <button
-            type="submit"
-            className="w-full rounded-xl bg-emerald-600 p-4 shadow-xl"
+              {data.statements.map((q, i) => (
+                <div
+                  className="my-4 border-b-2 border-stone-600 p-4 last:border-b-0"
+                  key={i}
+                >
+                  <label>
+                    <div className="italic">"{q}"</div>
+                    <select
+                      name={i.toString()}
+                      className="ml-auto block rounded-xl p-2"
+                      defaultValue={3}
+                    >
+                      <option value={1}>Hard no</option>
+                      <option value={2}>Prob not</option>
+                      <option value={3}>Unsure</option>
+                      <option value={4}>Guess so</option>
+                      <option value={5}>Heck yeah</option>
+                    </select>
+                  </label>
+                </div>
+              ))}
+            </fieldset>
+            <button
+              type="submit"
+              className="w-full rounded-xl bg-emerald-600 p-4 shadow-xl"
+            >
+              <div className="text-xl text-stone-50">Submit</div>
+            </button>
+          </div>
+        </Form>
+      )}
+      {!hasStatements && (
+        <div className="flex flex-grow flex-col justify-between">
+          <div className="mt-10 text-center text-xl">
+            <div>🤔</div>
+            <div>Statements not ready yet...</div>
+            <div>(try refreshing in a little while)</div>
+          </div>
+          <div
+            onClick={refresh}
+            className="mt-auto cursor-pointer rounded-xl bg-emerald-600 p-4 shadow-xl"
           >
-            <div className="text-xl text-stone-50">Submit</div>
-          </button>
+            <div className="mx-auto text-center text-xl text-stone-50">
+              Refresh
+            </div>
+          </div>
         </div>
-      </Form>
+      )}
     </div>
   );
 }

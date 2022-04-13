@@ -41,11 +41,10 @@ export default function Room() {
   const data = useLoaderData();
   const fetcher = useFetcher();
   const userIsAdmin = data.isAdmin;
-
+  const refresh = () => window.location.reload();
   const pair = () =>
     fetcher.submit({ room: data.room }, { method: "post", action: `/pair` });
 
-  const refresh = () => window.location.reload();
 
   return (
     <div
