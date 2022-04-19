@@ -3,16 +3,10 @@ import { useState } from "react";
 import { json, redirect } from "@remix-run/node";
 import { useLoaderData, Form } from "@remix-run/react";
 import { redisSet } from "~/utils/redis.server";
-import { getId, cookieHeader } from "~/utils/utils";
 
 export const loader: LoaderFunction = async ({ params, request }) => {
   const room = params.room;
-  const id = getId(request);
-  await redisSet(`${room}:exists`, "true");
-  await redisSet(`${room}:admin`, id);
-  return json({ room }, {
-    headers: { "Set-Cookie": cookieHeader(id) },
-  });
+  return json({ room });
 };
 
 export const action: ActionFunction = async ({ request }) => {

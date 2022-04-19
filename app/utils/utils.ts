@@ -2,10 +2,8 @@ import { customAlphabet } from "nanoid";
 
 type cookieObject = { [name: string]: string };
 
-export const parseCookie = (str: string | null | undefined): cookieObject => {
-  if (!str)
-    return {};
-  return !str ? {} : str
+export const parseCookie = (str: string): cookieObject => {
+  return str
     .split(";")
     .map((v) => v.split("="))
     .reduce((acc: cookieObject, v) => {
@@ -16,13 +14,22 @@ export const parseCookie = (str: string | null | undefined): cookieObject => {
 
 export const nanoid = customAlphabet("abcdefghijklmnopqrstuvwxyz", 6);
 
-export const cookieHeader = (id: string) => `id=${id}; Secure; Max-Age=3600; Path=/`;
+export const cookieHeader = (id: string) =>
+  `id=${id}; Max-Age=3600; Path=/`;
 
-export const getId = (request: Request) => {
-  try {
-    const cookie = request.headers.get("cookie")?.toString();
-    return parseCookie(cookie)["id"];
-  } catch (err) {
-    return nanoid();
+export const cookieId = (request: Request): string | null => {
+  const cookieStr = request.headers.get("cookie");
+  if (typeof cookieStr === "string") {
+    const cookies = parseCookie(cookieStr);
+    if ("id" in cookies) {
+      return cookies["id"];
+    }
   }
+  return null;
+};
+
+export const getId = (request: Request): string => {
+  const id = cookieId(request);
+  if (id !== null) return id;
+  return nanoid();
 };

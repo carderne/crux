@@ -20,8 +20,10 @@ type People = {
   [name: string]: number[];
 };
 
+export type SinglePairing = { statement: string; color: string };
+
 export type Pairings = {
-  [name: string]: { statement: string; color: string };
+  [name: string]: SinglePairing;
 };
 
 export const calculate = (statements: string[], people: People) => {
@@ -58,7 +60,6 @@ export const calculate = (statements: string[], people: People) => {
 type unparsedRatings = { [name: string]: string };
 
 const parseRatings = (ratings: unparsedRatings) => {
-  console.log(ratings);
   return Object.entries(ratings).reduce((acc: People, [key, val]) => {
     acc[key] = JSON.parse(val);
     return acc;

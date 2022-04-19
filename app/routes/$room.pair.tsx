@@ -1,11 +1,14 @@
 import type { LoaderFunction } from "@remix-run/node";
-import type { Pairings } from "./pair";
+import type { SinglePairing, Pairings } from "./pair";
 import { json } from "@remix-run/node";
 import { useLoaderData, useFetcher } from "@remix-run/react";
 import { redis } from "~/utils/redis.server";
-import { parseCookie } from "~/utils/utils";
+import { cookieId } from "~/utils/utils";
 
-export const getPairs = async (room: string, id: string) => {
+export const getPairs = async (
+  room: string,
+  id: string
+): Promise<SinglePairing | null> => {
   try {
     const result: Pairings = await redis
       .get(`${room}:pairings`)
@@ -16,7 +19,7 @@ export const getPairs = async (room: string, id: string) => {
   }
 };
 
-const checkAdmin = async (room: string, id: string) => {
+const checkAdmin = async (room: string, id: string): Promise<boolean> => {
   try {
     const adminId = await redis.get(`${room}:admin`);
     return id === adminId;
@@ -26,16 +29,18 @@ const checkAdmin = async (room: string, id: string) => {
 };
 
 export const loader: LoaderFunction = async ({ params, request }) => {
-  const room = params.room?.toString() || "";
-  const cookie = request.headers.get("cookie")?.toString();
-  const id = parseCookie(cookie)["id"];
-  const result = await getPairs(room, id);
-  const isAdmin = await checkAdmin(room, id);
-  return json({
-    room,
-    result,
-    isAdmin,
-  });
+  const room = params.room;
+  const id = cookieId(request);
+  if (typeof room === "string" && typeof id === "string") {
+    const result = await getPairs(room, id);
+    const isAdmin = await checkAdmin(room, id);
+    return json({
+      room,
+      result,
+      isAdmin,
+    });
+  }
+  throw new Error("Problem with `room` or `id`");
 };
 
 export default function Room() {
