@@ -23,6 +23,7 @@ test("pair route", async () => {
         return [["room", room]];
       },
     };
+    // @ts-ignore: this is mocked
     await action({ request });
     const pairings = await redis
       .get(`${room}:pairings`)

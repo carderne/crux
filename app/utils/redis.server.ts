@@ -7,14 +7,23 @@ declare global {
   var __redis: RedisType | undefined;
 }
 
+const getRedisUrl = (): string => {
+  const url = process.env.REDIS_URL;
+  console.log(url, typeof url);
+  if (typeof url === "string") return url;
+  throw new Error("REDIS_URL must be defined as an env var for production!");
+};
+
+
 // this is needed because in development we don't want to restart
 // the server with every change, but we want to make sure we don't
 // create a new connection to the Redis with every change either.
 if (process.env.NODE_ENV === "production") {
-  redis = new Redis(process.env.REDIS_URL);
+  const redisUrl = getRedisUrl();
+  redis = new Redis(redisUrl);
 } else {
   if (!global.__redis) {
-    global.__redis = new Redis(process.env.REDIS_URL);
+    global.__redis = new Redis();
   }
   redis = global.__redis;
 }

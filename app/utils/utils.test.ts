@@ -12,5 +12,6 @@ test("getId works", () => {
     },
   };
   const request = { headers };
+  // @ts-ignore: this is mocked
   expect(getId(request)).toHaveLength(6);
 });
