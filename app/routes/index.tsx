@@ -23,7 +23,7 @@ export default function Index() {
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    submit({ room: room.replace(" ", "-") }, { method: "post" });
+    submit({ room: room.replace(" ", "-").toLowerCase() }, { method: "post" });
   };
 
   return (
