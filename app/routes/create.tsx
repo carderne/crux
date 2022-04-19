@@ -1,9 +1,9 @@
 import type { LoaderFunction } from "@remix-run/node";
 import { redirect } from "@remix-run/node";
-import animals from "~/utils/animals";
-import adjectives from "~/utils/adjectives";
+import animals from "~/utils/animals.server";
+import adjectives from "~/utils/adjectives.server";
 import { redisSet } from "~/utils/redis.server";
-import { getId, cookieHeader } from "~/utils/utils";
+import { getId, cookieHeader } from "~/utils/utils.server";
 
 const random = (arr: Array<string>) =>
   arr[Math.floor(Math.random() * arr.length)];

@@ -14,8 +14,7 @@ export const parseCookie = (str: string): cookieObject => {
 
 export const nanoid = customAlphabet("abcdefghijklmnopqrstuvwxyz", 6);
 
-export const cookieHeader = (id: string) =>
-  `id=${id}; Max-Age=3600; Path=/`;
+export const cookieHeader = (id: string) => `id=${id}; Max-Age=3600; Path=/`;
 
 export const cookieId = (request: Request): string | null => {
   const cookieStr = request.headers.get("cookie");

@@ -9,11 +9,9 @@ declare global {
 
 const getRedisUrl = (): string => {
   const url = process.env.REDIS_URL;
-  console.log(url, typeof url);
   if (typeof url === "string") return url;
-  throw new Error("REDIS_URL must be defined as an env var for production!");
+  throw new Error("REDIS_URL must be defined as an env var");
 };
-
 
 // this is needed because in development we don't want to restart
 // the server with every change, but we want to make sure we don't
@@ -23,7 +21,12 @@ if (process.env.NODE_ENV === "production") {
   redis = new Redis(redisUrl);
 } else {
   if (!global.__redis) {
-    global.__redis = new Redis();
+    if (process.env.NODE_ENV === "development") {
+      const redisUrl = getRedisUrl();
+      global.__redis = new Redis(redisUrl);
+    } else {
+      global.__redis = new Redis();
+    }
   }
   redis = global.__redis;
 }

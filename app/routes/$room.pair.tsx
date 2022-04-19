@@ -3,7 +3,7 @@ import type { SinglePairing, Pairings } from "./pair";
 import { json } from "@remix-run/node";
 import { useLoaderData, useFetcher } from "@remix-run/react";
 import { redis } from "~/utils/redis.server";
-import { cookieId } from "~/utils/utils";
+import { cookieId } from "~/utils/utils.server";
 
 export const getPairs = async (
   room: string,

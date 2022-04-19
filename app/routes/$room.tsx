@@ -2,8 +2,7 @@ import type { LoaderFunction, ActionFunction } from "@remix-run/node";
 import { json, redirect } from "@remix-run/node";
 import { useLoaderData, Form } from "@remix-run/react";
 import { redis, redisHSet } from "~/utils/redis.server";
-import { getId, cookieHeader } from "~/utils/utils";
-
+import { getId, cookieHeader } from "~/utils/utils.server";
 
 export const loader: LoaderFunction = async ({ params, request }) => {
   const room = params.room;

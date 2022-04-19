@@ -1,4 +1,4 @@
-import { parseCookie, getId } from "./utils";
+import { parseCookie, getId } from "./utils.server";
 
 test("parseCookie works", () => {
   expect(parseCookie("id=1234;foo=bar")["id"]).toBe("1234");
