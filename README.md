@@ -1,6 +1,11 @@
 # crux
+A simple web-app to split a group of people into pairs with optimal levels of disagreement for [Double Crux](https://www.rationality.org/resources/updates/2016/double-crux) exercises!
 
-Based on the Indie [Remix Stack](https://remix.run/stacks).
+## Algorithms
+The app uses a simple greedy algorithm to create the pairs, which often won't be optimal.
+
+A better solution is in [double_crux.py](double_crux.py), using Mixed-Integer Linear Programming.
+This calculates the best disagreement based on maximising the maximum disagreement, maximising the minimum disagreement, or maximising the average disagreement, and is actually optimal! 🚀
 
 ## Development
 Install:
