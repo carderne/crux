@@ -10,18 +10,55 @@ pip install pulp
 ```
 """
 
-from typing import List, Tuple
+from operator import itemgetter
 
 import pulp as p
 
+from .models import Statements, People, Assignment, Pairings
+
 STRATS = (0, 1, 2)
 
+COLORS = [
+    "#1f78b4",
+    "#33a02c",
+    "#e31a1c",
+    "#ff7f00",
+    "#6a3d9a",
+    "#b15928",
+    "#a6cee3",
+    "#b2df8a",
+    "#fb9a99",
+    "#fdbf6f",
+    "#cab2d6",
+    "#ffff99",
+]
 
-def pairing(
-    arr: List[List[int]],
+
+def argmax(iterable):
+    return max(enumerate(iterable), key=lambda x: x[1])[0]
+
+
+def calculate(
+    statements: Statements,
+    people: People,
+) -> Pairings:
+    arr = people.arr
+    names = people.names
+    pairs = make_pairs(arr)
+    pairings = {}
+    for i, pair in enumerate(pairs):
+        c = COLORS[i]
+        s = statements[argmax(abs(a - b) for a, b in zip(*itemgetter(*pair)(arr)))]
+        for x in pair:
+            pairings[names[x]] = Assignment(statement=s, color=c)
+    return pairings
+
+
+def make_pairs(
+    arr: list[list[int]],
     strat: int = 0,
-    verbose: bool = False,
-) -> List[Tuple[int, int]]:
+    verbose: int = 0,
+) -> list[tuple[int, int]]:
     f"""
     Solve the given array with the supplied strategy,
     printing the solution and returning the pairs.
@@ -48,6 +85,12 @@ def pairing(
         0: max-max: make pairs with highest max disagreement
         1: max-min: make pairs with highest min disagreement
         2: max-avg: make pairs with highest avg disagreement
+
+    verbose :
+        must be one of (0, 1, 2)
+        0: no console output
+        1: print pairing summary
+        2: print the solver output
 
     Returns
     -------
@@ -143,22 +186,26 @@ def pairing(
     # This is the objective function
     prob += p.lpSum(xabs)
 
-    status = prob.solve(p.PULP_CBC_CMD(msg=verbose))
+    solve_msg = verbose == 2
+    status = prob.solve(p.PULP_CBC_CMD(msg=solve_msg))
     assert p.LpStatus[status] == "Optimal", "Optimal solution not found!"
 
     # Display pairings, and the question(s) the solution was based on
-    print(f"Pairs for {strat=}")
+    if verbose:
+        print(f"Pairs for {strat=}")
     pairs = []
     for i in N:
         for j in N[i:]:
             if any(m := [match[i][j][q].varValue for q in Q]):
                 pairs.append((i, j))
-                print(f"{i}-{j}:", [q for q, x in enumerate(m) if x])
-    print()
+                if verbose:
+                    print(f"{i}-{j}:", [q for q, x in enumerate(m) if x])
+    if verbose:
+        print()
     return pairs
 
 
 if __name__ == "__main__":
     arr = [[1, 1, 2], [3, 5, 3], [1, 1, 3], [5, 3, 2], [1, 1, 1]]
     for i in range(3):
-        pairing(arr, i)
+        make_pairs(arr, i, verbose=1)
