@@ -25,12 +25,12 @@ export const loader: LoaderFunction = async ({ params, request }) => {
 export const action: ActionFunction = async ({ request }) => {
   const body = await request.formData();
   const id = getId(request);
-  const { room, ...ratingsObj } = Object.fromEntries(body);
+  const { room, ...peopleObj } = Object.fromEntries(body);
 
-  const ratings = JSON.stringify(
-    Object.values(ratingsObj).map((r) => parseInt(r.toString()))
+  const people = JSON.stringify(
+    Object.values(peopleObj).map((r) => parseInt(r.toString()))
   );
-  await redisHSet(`${room}:ratings`, id, ratings);
+  await redisHSet(`${room}:people`, id, people);
 
   return redirect(`/${room}/pair`);
 };

@@ -22,6 +22,11 @@ Run dev server:
 npm run dev
 ```
 
+If you want the app to use the MILP backend, you must also run that server:
+```bash
+npm run api
+```
+
 ### Relevant code
 Everything interesting is in [app/](app/).
 
