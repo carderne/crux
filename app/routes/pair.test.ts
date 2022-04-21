@@ -13,11 +13,11 @@ test("calculate pairs", () => {
   expect(pairings.A).toEqual(pairings.B);
 });
 
-test("pair route", async () => {
+const test_pair = async (statements: string, people: string[]) => {
   try {
     const room = "fake-room";
-    await redis.set(`${room}:statements`, `["foo", "bar", "baz"]`);
-    await redis.hset(`${room}:ratings`, "A", "[1, 2, 3]", "B", "[5, 5, 5]");
+    await redis.set(`${room}:statements`, statements);
+    await redis.hset(`${room}:people`, ...people);
     const request = {
       formData: function () {
         return [["room", room]];
@@ -28,8 +28,29 @@ test("pair route", async () => {
     const pairings = await redis
       .get(`${room}:pairings`)
       .then((r: any) => JSON.parse(r));
-    expect(pairings.A.statement).toEqual(pairings.B.statement);
+    return pairings;
   } finally {
     await redis.flushall();
   }
+};
+
+test("pair with even number", async () => {
+  const statements = `["foo", "bar", "baz"]`;
+  const people = ["aaaaaa", "[1, 2, 3]", "bbbbbb", "[5, 5, 5]"];
+  const pairings = await test_pair(statements, people);
+  expect(pairings.aaaaaa.statement).toEqual(pairings.bbbbbb.statement);
+});
+
+test("pair with odd number", async () => {
+  const statements = `["foo", "bar", "baz"]`;
+  const people = [
+    "aaaaaa",
+    "[1, 2, 3]",
+    "bbbbbb",
+    "[5, 5, 5]",
+    "cccccc",
+    "[3, 3, 3]",
+  ];
+  const pairings = await test_pair(statements, people);
+  expect(pairings.aaaaaa.statement).toEqual(pairings.bbbbbb.statement);
 });

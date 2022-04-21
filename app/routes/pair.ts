@@ -57,13 +57,44 @@ export const calculate = (statements: string[], people: People) => {
   return pairings;
 };
 
-type unparsedRatings = { [name: string]: string };
+type unparsedPeople = { [name: string]: string };
 
-const parseRatings = (ratings: unparsedRatings) => {
-  return Object.entries(ratings).reduce((acc: People, [key, val]) => {
+const parsePeople = (people: unparsedPeople) => {
+  return Object.entries(people).reduce((acc: People, [key, val]) => {
     acc[key] = JSON.parse(val);
     return acc;
   }, {});
+};
+
+const milpApiUrl =
+  process.env.NODE_ENV === "production"
+    ? "https://crux-milp-api.onrender.com/pair"
+    : "http://127.0.0.1:8000/pair";
+
+const getPairings = async (statements: string[], people: People) => {
+  if (Object.keys(people).length % 2 == 0) {
+    // use the MILP API
+    try {
+      const fetchData = { statements, people };
+      const headers = new Headers();
+      headers.set("Content-Type", "application/json");
+
+      const fetchOptions = {
+        method: "POST",
+        headers: headers,
+        body: JSON.stringify(fetchData),
+      };
+      const pairings = await fetch(milpApiUrl, fetchOptions).then((res) =>
+        res.json()
+      );
+      return pairings;
+    } catch (err) {
+      // if the MILP API fails for any reason
+      // fall back to using the calculate() function
+    }
+  }
+  const pairings = calculate(statements, people);
+  return pairings;
 };
 
 export const action: ActionFunction = async ({ request }) => {
@@ -74,15 +105,15 @@ export const action: ActionFunction = async ({ request }) => {
     .get(`${room}:statements`)
     .then((res: any) => JSON.parse(res));
 
-  const ratings: People = await redis
-    .hgetall(`${room}:ratings`)
-    .then((res) => parseRatings(res));
+  const people: People = await redis
+    .hgetall(`${room}:people`)
+    .then((res) => parsePeople(res));
 
-  if (statements?.length === 0 || Object.keys(ratings).length === 0)
+  if (statements?.length === 0 || Object.keys(people).length === 0)
     return null;
 
-  const pairings = JSON.stringify(calculate(statements, ratings));
-  await redisSet(`${room}:pairings`, pairings);
+  const pairings = await getPairings(statements, people);
+  await redisSet(`${room}:pairings`, JSON.stringify(pairings));
 
   return null;
 };
